@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>jQuery Plugin</title>
+  <script type='text/javascript' src='http://code.jquery.com/jquery-1.6.2.js'></script>
+  <script type='text/javascript' src='include.js'></script>
+  <link rel="stylesheet" type="text/css" href="http://harvesthq.github.com/chosen/chosen/chosen.css">
+  <style type='text/css'>
+    select { width: 200px; }
+  </style>
+  <script type="text/javascript">
+    $(function () {
+      $('select').kyle({
+        opt1: 50
+      });
+    });
+  
+  </script>
+</head>
+<body>
+  <select id="parent" name="parent" title="Select parent">
+    <option value="2090">AAVW</option>
+    <option value="2091">AAVZ</option>
+    <option value="3484">ABCD</option>
+    <option value="2092">ABDN</option>
+    <option value="2093">ABDZ</option>
+    <option value="3037">ABEL</option>
+    <option value="5685">ABFL</option>
+    <option value="2323">ABNY</option>
+    <option value="2324">ABNZ</option>
+    <option value="5534">ABQQ</option>
+    <option value="5598">ABQZ</option>
+    <option value="3485">ABRN</option>
+    <option value="2094">ACEM</option>
+  </select>
+</body>
+</html>
