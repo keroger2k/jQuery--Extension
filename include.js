@@ -16,10 +16,35 @@
 		drop = $('<div/>', {
 			"class": 'drop'
 		}),
+
+    filter = $('<input/>', {
+      type: "text",
+      style: "width: 95%;",
+      keydown: function(e) {
+        switch(e.keyCode) {
+          case 9:  //Tab
+            toggleDrop();
+            break;
+          case 13: //Enter
+            toggleDrop();
+            break;
+          case 27: //Esc
+            toggleDrop();
+            break;
+          case 38: //Up
+            break;
+          case 40: //Down
+            break;
+          default:
+            //console.log(e.keyCode);
+            break;
+        };
+      }
+    }),
 		
 		search = $('<div/>', {
 			"class": 'search'
-		}).html('<input type="text" style="width:95%;"/>').appendTo(drop),
+		}).append(filter).appendTo(drop),
 		
 		clicker = $('<a/>', {
 				href: '#',
