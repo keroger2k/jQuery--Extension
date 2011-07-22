@@ -187,3 +187,5 @@ div.container ul.results li:hover {
   background: #3875d7;
   color: #fff;
 }
+
+div.container ul.results li.selected { background-color: blue; }
