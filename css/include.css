@@ -182,10 +182,4 @@ div.container-active ul.choices input {
   color: #111 !important;
 }
 
-div.container ul.results li:hover {
-	cursor: pointer;
-  background: #3875d7;
-  color: #fff;
-}
-
 div.container ul.results li.selected { background-color: blue; }

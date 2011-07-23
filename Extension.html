@@ -9,17 +9,13 @@
   <style type='text/css'>
     select { width: 200px;  }
 		.container { margin: 10% auto; }
-		#debug-info { margin: 0 auto; border: 1px solid silver; width: 400px; height: 200px; overflow: auto; }
+		#debug-info { margin: 0 auto; border: 1px solid silver; width: 800px; height: 300px; overflow: auto; }
 		h6 { margin: 0 auto; font-size: 1em; width: 400px; height: 20px; }
   </style>
   <script type="text/javascript">
     $(function () {
-			var debug = $('#debug-info');
-      $('select').kyle({
-        opt1: 50, 
-				selected: function(e) {
-					debug.prepend("<div>Selected --> value: " + e.val() + " text: " + e.text() + "</div>")
-				}
+			$('select').kyle({
+        opt1: 50
       });
     });
   

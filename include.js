@@ -1,14 +1,81 @@
+$(function() { 
+	
+	
+
+});
+
+
 (function ($) {
 	
   var Kyle = function (select, options) { 
-		var _select = $(select),
+	
+		var bugger = (function(){
+
+			var debug = $('#debug-info');
+
+			var addMessage = function(message){
+				debug.prepend('<div>' + message + ' ::<span>  ' + new Date().toString() + '</span></div>');
+			};
+
+			return {
+				addMessage: addMessage
+			};
+
+		})();
 		
-		debug = $('#debug-info'),
+		var handler = (function(){
+			
+			var mouseOut = function(e){ 
+				var target = $(e.target);
+				if(target.hasClass('list-item')){
+					bugger.addMessage("mouseout :: " + e.target);
+					target.removeClass('selected');				
+				}
+			};
+			
+			var mouseOver = function(e) {
+				var target = $(e.target);
+				if(target.hasClass('list-item')){
+					bugger.addMessage("mouseover :: " + e.target);
+					target.addClass('selected');				
+				}
+			};
+			
+			var mouseEnter = function(e) {
+				var target = $(e.target);
+				if(target.hasClass('list-item')){
+					bugger.addMessage("mouseenter :: " + e.target);
+					//target.addClass('selected');				
+				}
+			};
+			
+			var mouseLeave = function(e) {
+				var target = $(e.target);
+				if(target.hasClass('list-item')){
+					bugger.addMessage("mouseleave :: " + e.target);
+					//target.addClass('selected');				
+				}
+			};
+			
+			return {
+				mouseout: mouseOut,
+				mouseover: mouseOver,
+				mouseenter: mouseEnter,
+				mouseleave: mouseLeave
+			};
+			
+		})();
+	
+		var _select = $(select),
 		
 		title = select.title || "Select Option...",
 	  
 		results = $('<ul/>', {
-			"class": 'results'
+			"class": 'results',
+			mouseout: handler.mouseout,
+			mouseenter: handler.mouseover,
+			mouseleave: handler.mouseleave,
+			mouseover: handler.mouseover
 		}),
 		
 		container = $('<div/>', {
@@ -29,24 +96,24 @@
       keydown: function(e) {
         switch(e.keyCode) {
           case 9:  //Tab
-						debug.prepend("<div>Tab Selected</div>")
+						bugger.addMessage("Tab Selected")
             toggleDrop();
             break;
           case 13: //Enter
-						debug.prepend("<div>Enter Selected</div>")
+						bugger.addMessage("Enter Selected")
 						filter.blur();
             toggleDrop();
             break;
           case 27: //Esc
-						debug.prepend("<div>Esc Selected</div>")
+						bugger.addMessage("Esc Selected")
             toggleDrop();
             break;
           case 38: //Up
-            debug.prepend("<div>Up Arrow</div>")
+            bugger.addMessage("Up Arrow")
 						highlightItem(-1);
 						break;
           case 40: //Down
-          	debug.prepend("<div>Down Arrow</div>")
+          	bugger.addMessage("Down Arrow")
 						highlightItem(1);
             break;
           default:
@@ -68,19 +135,23 @@
 				"class": "clicker",
 		}).html('<span>' + title + '</span><div><b></b></div>').appendTo(container)
 		
-		currentPosition = -1;
+		currentPosition = -1,
+		beenSelected = false;
 		
-		_select.hide().after(container);
+		//_select.hide().after(container);
+		_select.after(container);
 		
 		clicker.bind('click', function(e) {
 			info.html('<span>Count: # </span>')
-			filter.focus();
-			toggleDrop();		
+			filter.focus();  //not working
+			toggleDrop();	
+			if(beenSelected) { highlightSelected(_select.val()); }	
 		});
 		
 		results.click(function(e) {
 			toggleDrop();
 			options.selected($(e.target));
+			beenSelected = true;
 			$('span', clicker).text(e.target.innerText);
 			_select.val(e.target.value)			
 		});
@@ -90,7 +161,7 @@
 		$('option', _select).each(function(index, item) {
 			results.append($('<li/>', { 
 				value: this.value,
-				"class": 'list-item' 
+				"class": 'list-item',
 			}).html(this.innerHTML))
 			.appendTo(drop);
 		});
@@ -100,6 +171,13 @@
 			container.toggleClass('container-active');
 			clicker.toggleClass('with-drop');			
 		};
+		
+		var highlightSelected = function(item) {
+			$('li', results).removeClass('selected');
+			$('li[value="' +item +'"]', results).addClass('selected');
+		};
+		
+		
 		
 		var highlightItem = function(number) {
 			var items = $('li', results);
