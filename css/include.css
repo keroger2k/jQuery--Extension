@@ -178,8 +178,14 @@ div.container-active ul.choices {
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
   border: 1px solid #5897fb;
 }
+
+div.container-active ul li { padding: 7px; }
+
 div.container-active ul.choices input {
   color: #111 !important;
 }
 
-div.container ul.results li.selected { background-color: blue; }
+div.container ul.results li.selected { 
+	background: #3875d7;
+  color: #fff; 
+}

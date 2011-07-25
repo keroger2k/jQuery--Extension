@@ -28,7 +28,7 @@ $(function() {
 			var mouseOut = function(e){ 
 				var target = $(e.target);
 				if(target.hasClass('list-item')){
-					bugger.addMessage("mouseout :: " + e.target);
+					bugger.addMessage("mouseout :: " + e.target + " :: index :: " + $(e.target).data('index'));
 					target.removeClass('selected');				
 				}
 			};
@@ -36,64 +36,12 @@ $(function() {
 			var mouseOver = function(e) {
 				var target = $(e.target);
 				if(target.hasClass('list-item')){
-					bugger.addMessage("mouseover :: " + e.target);
+					bugger.addMessage("mouseover :: " + e.target + " :: index :: " + $(e.target).data('index'));
 					target.addClass('selected');				
 				}
 			};
 			
-			var mouseEnter = function(e) {
-				var target = $(e.target);
-				if(target.hasClass('list-item')){
-					bugger.addMessage("mouseenter :: " + e.target);
-					//target.addClass('selected');				
-				}
-			};
-			
-			var mouseLeave = function(e) {
-				var target = $(e.target);
-				if(target.hasClass('list-item')){
-					bugger.addMessage("mouseleave :: " + e.target);
-					//target.addClass('selected');				
-				}
-			};
-			
-			return {
-				mouseout: mouseOut,
-				mouseover: mouseOver,
-				mouseenter: mouseEnter,
-				mouseleave: mouseLeave
-			};
-			
-		})();
-	
-		var _select = $(select),
-		
-		title = select.title || "Select Option...",
-	  
-		results = $('<ul/>', {
-			"class": 'results',
-			mouseout: handler.mouseout,
-			mouseenter: handler.mouseover,
-			mouseleave: handler.mouseleave,
-			mouseover: handler.mouseover
-		}),
-		
-		container = $('<div/>', {
-			"class": 'container'
-		}),
-		
-		drop = $('<div/>', {
-			"class": 'drop'
-		}),
-		
-		info = $('<div/>', {
-			"class": 'info-container'
-		}).appendTo(drop),
-
-    filter = $('<input/>', {
-      type: "text",
-      style: "width: 95%;",
-      keydown: function(e) {
+			var keyDown = function(e) {
         switch(e.keyCode) {
           case 9:  //Tab
 						bugger.addMessage("Tab Selected")
@@ -120,9 +68,52 @@ $(function() {
             //console.log(e.keyCode);
             break;
         }
+			};
+			
+			return {
+				mouseout: mouseOut,
+				mouseover: mouseOver,
+				keydown: keyDown
+			};
+			
+		})();
+	
+		var _select = $(select),
+		
+		title = select.title || "Select Option...",
+	  
+		results = $('<ul/>', {
+			"class": 'results',
+			mouseout: function(e) {
+				handler.mouseout(e);
 			},
-			focus: function(e) {
-					
+			mouseover: function(e) {
+				if(listItems[highlightedPosition]){
+					listItems[highlightedPosition].removeClass('selected');
+				}
+				highlightedPosition = $(e.target).data('index');
+				handler.mouseover(e);
+			}
+		}),
+		
+		container = $('<div/>', {
+			"class": 'container'
+		}),
+		
+		drop = $('<div/>', {
+			"class": 'drop'
+		}),
+		
+		info = $('<div/>', {
+			"class": 'info-container'
+		}).appendTo(drop),
+
+    filter = $('<input/>', {
+      type: "text",
+      style: "width: 95%;",
+			keydown: handler.keydown,
+      focus: function(e) {
+				$(this.target).focus();
 			}
     }),
 		
@@ -135,17 +126,18 @@ $(function() {
 				"class": "clicker",
 		}).html('<span>' + title + '</span><div><b></b></div>').appendTo(container)
 		
-		currentPosition = -1,
-		beenSelected = false;
+		highlightedPosition = -1,
+		beenSelected = false,
+		listItems = [];
 		
 		//_select.hide().after(container);
 		_select.after(container);
 		
 		clicker.bind('click', function(e) {
 			info.html('<span>Count: # </span>')
-			filter.focus();  //not working
 			toggleDrop();	
 			if(beenSelected) { highlightSelected(_select.val()); }	
+			filter.focus();  //not working
 		});
 		
 		results.click(function(e) {
@@ -159,11 +151,14 @@ $(function() {
 		drop.hide().appendTo(container);
 		
 		$('option', _select).each(function(index, item) {
-			results.append($('<li/>', { 
+			var item = $('<li/>', { 
 				value: this.value,
-				"class": 'list-item',
-			}).html(this.innerHTML))
-			.appendTo(drop);
+				"class": 'list-item visible',
+				"data-index": index
+			}).html(this.innerHTML);
+			listItems.push(item);
+			results.append(item)
+				.appendTo(drop);
 		});
 		
 		var toggleDrop = function() {
@@ -177,29 +172,28 @@ $(function() {
 			$('li[value="' +item +'"]', results).addClass('selected');
 		};
 		
-		
-		
 		var highlightItem = function(number) {
+			console.log(this);
 			var items = $('li', results);
 			
-			if(currentPosition === -1 && number > 0) {
-				currentPosition += number;
-				$(items[currentPosition]).addClass('selected');
+			if(highlightedPosition === -1 && number > 0) {
+				highlightedPosition += number;
+				$(items[highlightedPosition]).addClass('selected');
 				return;
 			}
 			
-			if(currentPosition === 0 && number < 0) { return; }
+			if(highlightedPosition === 0 && number < 0) { return; }
 			
-			if(currentPosition >= 0 && currentPosition < items.length - 1) {
-				$(items[currentPosition]).removeClass('selected');
-				currentPosition += number;
-				$(items[currentPosition]).addClass('selected');
+			if(highlightedPosition >= 0 && highlightedPosition < items.length - 1) {
+				$(items[highlightedPosition]).removeClass('selected');
+				highlightedPosition += number;
+				$(items[highlightedPosition]).addClass('selected');
 			}
 			
-			if(currentPosition === items.length - 1 && number < 0) {
-				$(items[currentPosition]).removeClass('selected');
-				currentPosition += number;
-				$(items[currentPosition]).addClass('selected');
+			if(highlightedPosition === items.length - 1 && number < 0) {
+				$(items[highlightedPosition]).removeClass('selected');
+				highlightedPosition += number;
+				$(items[highlightedPosition]).addClass('selected');
 			}
 		};
 		
