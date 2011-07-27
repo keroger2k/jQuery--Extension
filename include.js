@@ -1,10 +1,3 @@
-$(function() { 
-	
-	
-
-});
-
-
 (function ($) {
 	
   var Kyle = function (select, options) { 
@@ -14,7 +7,7 @@ $(function() {
 			var debug = $('#debug-info');
 
 			var addMessage = function(message){
-				debug.prepend('<div>' + message + ' ::<span>  ' + new Date().toString() + '</span></div>');
+				debug.prepend('<div>' + message + '<span style="float:right;">  ' + new Date().toString() + '</span></div>');
 			};
 
 			return {
@@ -24,46 +17,33 @@ $(function() {
 		})();
 		
 		var handler = (function(){
-			
-			var mouseOut = function(e){ 
-				var target = $(e.target);
-				if(target.hasClass('list-item')){
-					bugger.addMessage("mouseout :: " + e.target + " :: index :: " + $(e.target).data('index'));
-					target.removeClass('selected');				
-				}
-			};
-			
-			var mouseOver = function(e) {
-				var target = $(e.target);
-				if(target.hasClass('list-item')){
-					bugger.addMessage("mouseover :: " + e.target + " :: index :: " + $(e.target).data('index'));
-					target.addClass('selected');				
-				}
-			};
-			
 			var keyDown = function(e) {
         switch(e.keyCode) {
           case 9:  //Tab
-						bugger.addMessage("Tab Selected")
+						bugger.addMessage("Tab Selected");
             toggleDrop();
             break;
           case 13: //Enter
-						bugger.addMessage("Enter Selected")
+						bugger.addMessage("Enter Selected");
 						filter.blur();
             toggleDrop();
             break;
           case 27: //Esc
-						bugger.addMessage("Esc Selected")
+						bugger.addMessage("Esc Selected");
             toggleDrop();
             break;
           case 38: //Up
-            bugger.addMessage("Up Arrow")
-						highlightItem(-1);
+						if(highlightedPosition <= 0) {
+							return;
+						}
+						results.trigger('selectitem', results.children().eq(--highlightedPosition));
 						break;
           case 40: //Down
-          	bugger.addMessage("Down Arrow")
-						highlightItem(1);
-            break;
+						if(highlightedPosition === results.children().length - 1){
+							return;
+						}
+						results.trigger('selectitem', results.children().eq(++highlightedPosition));
+		        break;
           default:
             //console.log(e.keyCode);
             break;
@@ -71,8 +51,6 @@ $(function() {
 			};
 			
 			return {
-				mouseout: mouseOut,
-				mouseover: mouseOver,
 				keydown: keyDown
 			};
 			
@@ -84,15 +62,9 @@ $(function() {
 	  
 		results = $('<ul/>', {
 			"class": 'results',
-			mouseout: function(e) {
-				handler.mouseout(e);
-			},
 			mouseover: function(e) {
-				if(listItems[highlightedPosition]){
-					listItems[highlightedPosition].removeClass('selected');
-				}
+				$(this).trigger('selectitem', e.target);
 				highlightedPosition = $(e.target).data('index');
-				handler.mouseover(e);
 			}
 		}),
 		
@@ -111,7 +83,9 @@ $(function() {
     filter = $('<input/>', {
       type: "text",
       style: "width: 95%;",
-			keydown: handler.keydown,
+			keydown: function(e) {
+				handler.keydown(e);
+			},
       focus: function(e) {
 				$(this.target).focus();
 			}
@@ -127,25 +101,51 @@ $(function() {
 		}).html('<span>' + title + '</span><div><b></b></div>').appendTo(container)
 		
 		highlightedPosition = -1,
+		highlightedItem = undefined,
 		beenSelected = false,
 		listItems = [];
 		
 		//_select.hide().after(container);
 		_select.after(container);
+		$('body').click(function(e) {
+			drop.hide();
+			container.removeClass('container-active');
+			clicker.removeClass('with-drop');
+		});
 		
 		clicker.bind('click', function(e) {
+			e.stopPropagation();
 			info.html('<span>Count: # </span>')
 			toggleDrop();	
 			if(beenSelected) { highlightSelected(_select.val()); }	
-			filter.focus();  //not working
+			filter.focus(); 
+			bugger.addMessage("Results height: " + results.height() + " scrollTop: " + results.scrollTop());
+			
+			if(this.highlightedItem !== undefined) { 
+				bugger.addMessage("Highlighted Item: " + highlightedItem.value)
+			}
 		});
 		
 		results.click(function(e) {
 			toggleDrop();
 			options.selected($(e.target));
 			beenSelected = true;
+			highlightedItem = $(e.target);
 			$('span', clicker).text(e.target.innerText);
 			_select.val(e.target.value)			
+		});
+		
+		results.bind('selectitem', function(e, item){
+			var target = $(item);
+			
+			if(highlightedItem) {
+				highlightedItem.removeClass('selected');	
+			}
+			
+			if(target.hasClass('list-item')){
+				highlightedItem = target;
+				target.addClass('selected');				
+			}
 		});
 		
 		drop.hide().appendTo(container);
@@ -171,32 +171,6 @@ $(function() {
 			$('li', results).removeClass('selected');
 			$('li[value="' +item +'"]', results).addClass('selected');
 		};
-		
-		var highlightItem = function(number) {
-			console.log(this);
-			var items = $('li', results);
-			
-			if(highlightedPosition === -1 && number > 0) {
-				highlightedPosition += number;
-				$(items[highlightedPosition]).addClass('selected');
-				return;
-			}
-			
-			if(highlightedPosition === 0 && number < 0) { return; }
-			
-			if(highlightedPosition >= 0 && highlightedPosition < items.length - 1) {
-				$(items[highlightedPosition]).removeClass('selected');
-				highlightedPosition += number;
-				$(items[highlightedPosition]).addClass('selected');
-			}
-			
-			if(highlightedPosition === items.length - 1 && number < 0) {
-				$(items[highlightedPosition]).removeClass('selected');
-				highlightedPosition += number;
-				$(items[highlightedPosition]).addClass('selected');
-			}
-		};
-		
   };
 
   $.fn.extend({
