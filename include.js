@@ -20,29 +20,26 @@
 			var keyDown = function(e) {
         switch(e.keyCode) {
           case 9:  //Tab
-						bugger.addMessage("Tab Selected");
-            toggleDrop();
+						toggleDrop();
             break;
           case 13: //Enter
-						bugger.addMessage("Enter Selected");
+						results.trigger('selectitem', highlightedItem);	
 						filter.blur();
-            toggleDrop();
             break;
           case 27: //Esc
-						bugger.addMessage("Esc Selected");
-            toggleDrop();
+						toggleDrop();
             break;
           case 38: //Up
 						if(highlightedPosition <= 0) {
 							return;
 						}
-						results.trigger('selectitem', results.children().eq(--highlightedPosition));
+						results.trigger('highlightitem', results.children().eq(--highlightedPosition));
 						break;
           case 40: //Down
 						if(highlightedPosition === results.children().length - 1){
 							return;
 						}
-						results.trigger('selectitem', results.children().eq(++highlightedPosition));
+						results.trigger('highlightitem', results.children().eq(++highlightedPosition));
 		        break;
           default:
             //console.log(e.keyCode);
@@ -63,7 +60,7 @@
 		results = $('<ul/>', {
 			"class": 'results',
 			mouseover: function(e) {
-				$(this).trigger('selectitem', e.target);
+				$(this).trigger('highlightitem', e.target);
 				highlightedPosition = $(e.target).data('index');
 			}
 		}),
@@ -102,40 +99,42 @@
 		
 		highlightedPosition = -1,
 		highlightedItem = undefined,
+		selectedItem = undefined,
 		beenSelected = false,
 		listItems = [];
 		
 		//_select.hide().after(container);
 		_select.after(container);
 		$('body').click(function(e) {
-			drop.hide();
-			container.removeClass('container-active');
-			clicker.removeClass('with-drop');
+			//drop.hide();
+			//container.removeClass('container-active');
+			//clicker.removeClass('with-drop');
 		});
 		
 		clicker.bind('click', function(e) {
 			e.stopPropagation();
 			info.html('<span>Count: # </span>')
 			toggleDrop();	
-			if(beenSelected) { highlightSelected(_select.val()); }	
+			if(selectedItem) { 
+				results.trigger('highlightitem', selectedItem);
+			}	
 			filter.focus(); 
-			bugger.addMessage("Results height: " + results.height() + " scrollTop: " + results.scrollTop());
-			
-			if(this.highlightedItem !== undefined) { 
-				bugger.addMessage("Highlighted Item: " + highlightedItem.value)
-			}
 		});
 		
 		results.click(function(e) {
-			toggleDrop();
-			options.selected($(e.target));
-			beenSelected = true;
-			highlightedItem = $(e.target);
-			$('span', clicker).text(e.target.innerText);
-			_select.val(e.target.value)			
+			results.trigger('selectitem', e.target);	
 		});
 		
 		results.bind('selectitem', function(e, item){
+			var target = $(item)
+			toggleDrop();
+			options.selected(target);
+			highlightedItem = selectedItem = target;
+			$('span', clicker).text(target.text());
+			_select.val(target.val())
+		});
+		
+		results.bind('highlightitem', function(e, item){
 			var target = $(item);
 			
 			if(highlightedItem) {
@@ -165,11 +164,6 @@
 			drop.is(":visible") ? drop.hide() : drop.show();
 			container.toggleClass('container-active');
 			clicker.toggleClass('with-drop');			
-		};
-		
-		var highlightSelected = function(item) {
-			$('li', results).removeClass('selected');
-			$('li[value="' +item +'"]', results).addClass('selected');
 		};
   };
 
