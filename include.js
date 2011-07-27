@@ -1,20 +1,6 @@
 (function ($) {
 	
   var Kyle = function (select, options) { 
-	
-		var bugger = (function(){
-
-			var debug = $('#debug-info');
-
-			var addMessage = function(message){
-				debug.prepend('<div>' + message + '<span style="float:right;">  ' + new Date().toString() + '</span></div>');
-			};
-
-			return {
-				addMessage: addMessage
-			};
-
-		})();
 		
 		var handler = (function(){
 			var keyDown = function(e) {
@@ -101,6 +87,7 @@
 		highlightedItem = undefined,
 		selectedItem = undefined,
 		beenSelected = false,
+		scrollPosition = undefined,
 		listItems = [];
 		
 		//_select.hide().after(container);
@@ -113,10 +100,11 @@
 		
 		clicker.bind('click', function(e) {
 			e.stopPropagation();
-			info.html('<span>Count: # </span>')
+			info.html('<span>Count: ' + results.children().length +' </span>')
 			toggleDrop();	
 			if(selectedItem) { 
 				results.trigger('highlightitem', selectedItem);
+				results.scrollTop(scrollPosition);
 			}	
 			filter.focus(); 
 		});
@@ -127,6 +115,7 @@
 		
 		results.bind('selectitem', function(e, item){
 			var target = $(item)
+			scrollPosition = results.scrollTop();
 			toggleDrop();
 			options.selected(target);
 			highlightedItem = selectedItem = target;
@@ -136,6 +125,20 @@
 		
 		results.bind('highlightitem', function(e, item){
 			var target = $(item);
+			var resultsHeight = results.outerHeight();
+			var resultsOffsetTop = results.offset().top;
+			var itemOffsetTop = target.offset().top;
+			var itemHeight = target.outerHeight();
+			var scrollTopPosition = results.scrollTop();
+			
+			if(target.hasClass('list-item')) {
+				if((resultsOffsetTop + resultsHeight) < (itemOffsetTop + itemHeight)){
+					results.scrollTop(results.scrollTop() + itemHeight);
+				}
+				if(resultsOffsetTop > itemOffsetTop) {
+					results.scrollTop(results.scrollTop() - itemHeight);
+				}
+			}
 			
 			if(highlightedItem) {
 				highlightedItem.removeClass('selected');	
