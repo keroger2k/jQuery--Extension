@@ -1,3 +1,13 @@
+(function($) {
+
+$.fn.filterByText = function( value ) {
+    return this.filter( function() {
+        return $( this ).text().indexOf(value) !== -1;
+    });
+};
+
+})(jQuery);
+
 (function ($) {
 	
   var Kyle = function (select, options) { 
@@ -28,13 +38,29 @@
 						results.trigger('highlightitem', results.children().eq(++highlightedPosition));
 		        break;
           default:
-            //console.log(e.keyCode);
+            //console.log(filter.val());
+            break;
+        }
+			};
+			
+			var keyUp = function(e) {
+        switch(e.keyCode) {
+          case 9:  //Tab
+          case 13: //Enter
+          case 27: //Esc
+          case 38: //Up
+          case 40: //Down
+		        break;
+          default:
+						console.log($('li',results).filterByText(filter.val()));
+            //console.log(filter.val());
             break;
         }
 			};
 			
 			return {
-				keydown: keyDown
+				keydown: keyDown,
+				keyup: keyUp
 			};
 			
 		})();
@@ -68,6 +94,9 @@
       style: "width: 95%;",
 			keydown: function(e) {
 				handler.keydown(e);
+			},
+			keyup: function(e){
+				handler.keyup(e);
 			},
       focus: function(e) {
 				$(this.target).focus();
@@ -162,6 +191,16 @@
 			results.append(item)
 				.appendTo(drop);
 		});
+		
+		var filterList = function( type, value ) {
+		    return this.filter( function() {
+		        var $this = $( this );
+
+		        return value != null ?
+		            $this.data( type ) === value :
+		            $this.data( type ) != null;
+		    });
+		};
 		
 		var toggleDrop = function() {
 			drop.is(":visible") ? drop.hide() : drop.show();
