@@ -52,7 +52,7 @@ $.fn.filterByText = function( value ) {
           case 40: //Down
 		        break;
           default:
-						console.log($('li',results).filterByText(filter.val()));
+						populateSelect($(listItems).filterByText(filter.val()));
             //console.log(filter.val());
             break;
         }
@@ -182,15 +182,28 @@ $.fn.filterByText = function( value ) {
 		drop.hide().appendTo(container);
 		
 		$('option', _select).each(function(index, item) {
-			var item = $('<li/>', { 
-				value: this.value,
-				"class": 'list-item visible',
-				"data-index": index
-			}).html(this.innerHTML);
 			listItems.push(item);
-			results.append(item)
-				.appendTo(drop);
 		});
+		
+		
+		
+		var populateSelect = function(list) {
+			var len = list.length, i = 0;
+			results.empty();
+			for( ; i < len; i++) {
+				var item = $('<li/>', { 
+					value: list[i].value,
+					"class": 'list-item visible',
+					"data-index": i
+				}).html(list[i].innerHTML);
+				results.append(item);
+			}
+			
+			results.appendTo(drop);
+			
+		};
+				
+		populateSelect(listItems);
 		
 		var filterList = function( type, value ) {
 		    return this.filter( function() {
