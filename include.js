@@ -129,7 +129,6 @@ $.fn.filterByText = function( value ) {
 		
 		clicker.bind('click', function(e) {
 			e.stopPropagation();
-			info.html('<span>Count: ' + results.children().length +' </span>')
 			toggleDrop();	
 			if(selectedItem) { 
 				results.trigger('highlightitem', selectedItem);
@@ -197,6 +196,7 @@ $.fn.filterByText = function( value ) {
 					"data-index": i
 				}).html(list[i].innerHTML);
 				results.append(item);
+				info.html('<span>Count: ' + results.children().length +' </span>');
 			}
 			
 			results.appendTo(drop);
