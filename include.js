@@ -2,7 +2,7 @@
 
 $.fn.filterByText = function( value ) {
     return this.filter( function() {
-        return $( this ).text().indexOf(value) !== -1;
+        return $( this ).text().toLowerCase().indexOf(value.toString().toLowerCase()) !== -1;
     });
 };
 
@@ -152,12 +152,12 @@ $.fn.filterByText = function( value ) {
 		});
 		
 		results.bind('highlightitem', function(e, item){
-			var target = $(item);
-			var resultsHeight = results.outerHeight();
-			var resultsOffsetTop = results.offset().top;
-			var itemOffsetTop = target.offset().top;
-			var itemHeight = target.outerHeight();
-			var scrollTopPosition = results.scrollTop();
+			var target = $(item),
+			 		resultsHeight = results.outerHeight(),
+			 		resultsOffsetTop = results.offset().top,
+		 			itemOffsetTop = target.offset().top,
+			 		itemHeight = target.outerHeight(),
+			 		scrollTopPosition = results.scrollTop();
 			
 			if(target.hasClass('list-item')) {
 				if((resultsOffsetTop + resultsHeight) < (itemOffsetTop + itemHeight)){
